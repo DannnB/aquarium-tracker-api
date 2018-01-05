@@ -1,3 +1,5 @@
+# environment vars
+nodemon.json
 # Logs
 logs
 *.log
@@ -57,3 +59,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# json stuff
+*-lock.json
+
+# dirs
+uploads/

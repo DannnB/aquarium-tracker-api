@@ -1,0 +1,24 @@
+{
+  "name": "node-rest-shop",
+  "version": "1.0.0",
+  "description": "A Node.js RESTful API (Build a simple shop)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "Dan B",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "mongoose": "^4.13.7",
+    "morgan": "^1.9.0",
+    "multer": "^1.3.0",
+    "nodemon": "^1.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.5"
+  }
+}
