@@ -15,6 +15,7 @@ mongoose.connect(
 mongoose.Promise = global.Promise; // uses Node js default promise, remvoes depreaction warning
 
 app.use(morgan('dev'));
+app.use('/uploads', express.static('uploads')); // parse only requests at /uplaods
 // parse URL encoded data eg page?name=value
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json()); 

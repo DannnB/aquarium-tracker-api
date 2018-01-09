@@ -2,16 +2,46 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
-const upload = multer({dest: 'uploads/'});// store all uploaded files in this place
+
+const storage = multer.diskStorage({
+   destination: function(req, file, cb){
+       cb(null, './uploads'); // call back
+   },
+   filename: function(req, file, cb){
+       cb(null, new Date().toISOString() + file.originalname);
+   }
+});
+
+const fileFilter = (req, file, cb) => {
+  // reject a file
+  if(file.mimetype === 'image/jpeg' || file.minetype === 'image/png'){
+    cb(null, true); // stores file
+  }
+  // other files, not save
+  cb(null, false); // ignore and don't store file 
+  // logic here to sort out the file if its wrong mime type
+  
+};
+
+const upload = multer({
+    storage: storage, 
+    limits: {
+        fileSize: 1024 * 1024 * 5// 5MB Max
+    },
+    fileFilter: fileFilter
+});// store all uploaded files in this place
 
 const Product = require('../models/product'); // import model exported from product.js
+
+// impliment a route to parse all requets to /uploads and look up the image and return
+// or make uploads publically avalible
 
 let BASE_URL = process.env.BASE_URL_PROTO + process.env['C9_HOSTNAME'];
 
 // /products is already set, this jjust adds to the url so /products/products if it was set in here eg '/id' = /products/id
 router.get('/', (req, res, next) =>{
     Product.find() // find all // .limit(5) etc
-    .select('name price _id')// define which fields to select
+    .select('name price _id productImage')// define which fields to select
     .exec()
     .then(docs => {
         //return more
@@ -21,16 +51,18 @@ router.get('/', (req, res, next) =>{
                 return {
                     // returns a new version of doc
                     // mannually assign values
+                    // return own object, of what ever you like
                     name: doc.name,
                     price: doc.price,
+                    productImage: doc.productImage,
                     _id: doc._id,
                     request: {
                         type: 'GET',
                         url: BASE_URL + '/products/' + doc._id
                     }
-                }
+                };
             })
-        }
+        };
         res.status(200).json(response);
         // IF YOU NEED AN ERROR RESPONSE (ITS AN EMPTY ARRAY SO NOT REALLY AN ERROR)
         // if(docs.length >= 0){
@@ -42,16 +74,16 @@ router.get('/', (req, res, next) =>{
         // }
     })
     .catch(err => {
-        console.log(err)
+        console.log(err);
         res.status(500).json({
             error: err
-        })
+        });
     });
     
 });
 
 router.post('/', upload.single('productImage'),(req, res, next) =>{ // middleware  2nd argument from "Mutler"
-    console.log(req.file) // adds new objecy from uplaod.single()
+    console.log("File data: ", req.file); // adds new objecy from uplaod.single()
     // const productOld = {
     //     // this isn't needed now the database in set up
     //     name: req.body.name,
@@ -62,8 +94,9 @@ router.post('/', upload.single('productImage'),(req, res, next) =>{ // middlewar
     const product = new Product({ // passes data to DB
         _id: new mongoose.Types.ObjectId(), // creates a new unique _id value
         name: req.body.name,
-        price: req.body.price // required values and settings are set oin the schema as below:
+        price: req.body.price, // required values and settings are set oin the schema as below:
         //{type: Number, required: true // make sure this field is required } 
+        productImage: req.file.path // uses multer to get path from uplaoded data
     });
     // method used on models and stores this data in DB
     product
@@ -76,27 +109,28 @@ router.post('/', upload.single('productImage'),(req, res, next) =>{ // middlewar
                     // return new object removing bits
                     name: result.name,
                     price: result.price,
+                    productImage: result.productImage,
                     _id: result._id,
                     request: {
                         type: 'GET',
                         url: BASE_URL + '/products/' + result._id
                     }
                 }
-            })
+            });
             
         })
         .catch(err => {
             console.log(err);
             res.status(500).json({
                 error: err
-            })
+            });
         });
 });
 
 router.get('/:productId', (req, res, next) =>{ // :productId is a varible
     const id = req.params.productId; // data fetched from database
     Product.findById(id)
-    .select('name price _id')
+    .select('name price _id productImage')
     .exec()
     .then(doc => {
         console.log("From database", doc);
@@ -104,15 +138,10 @@ router.get('/:productId', (req, res, next) =>{ // :productId is a varible
             // if nott null / isn't there
             res.status(200).json({
                 message: "Got product successfully",
-                product: {
-                    // return new object removing bits
-                    name: doc.name,
-                    price: doc.price,
-                    _id: doc._id,
-                    request: {
-                        type: 'GET',
-                        url: BASE_URL + '/products/' + doc._id
-                    }
+                product: doc,
+                request: {
+                    type: 'GET',
+                    url: BASE_URL + '/products/' + doc._id
                 }
                 // or
                 // product: doc,
@@ -121,7 +150,7 @@ router.get('/:productId', (req, res, next) =>{ // :productId is a varible
                 //     description: 'Get all products'
                 //     url: 'https://' + process.env['C9_HOSTNAME'] + '/products/'
                 // }
-            })
+            });
         }else {
             res.status(404).json({message: 'No valid entry found for provided ID'});
         }
@@ -176,8 +205,8 @@ router.patch('/:productId', (req, res, next) =>{
         console.log(err);
         res.status(500).json({
             error: err
-        })
-    })
+        });
+    });
 });
 
 router.delete('/:productId', (req, res, next) =>{
@@ -203,7 +232,7 @@ router.delete('/:productId', (req, res, next) =>{
         console.log(err);
         res.status(500).json({
             error: err
-        })
+        });
     });
 });
 
