@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 const Tank = require('../models/tank'); // import model exported from product.js
 
-let BASE_URL = process.env.BASE_URL_PROTO + process.env['C9_HOSTNAME'];
+let BASE_URL = "" // process.env.BASE_URL_PROTO + process.env['C9_HOSTNAME'];
 
 // /products is already set, this jjust adds to the url so /products/products if it was set in here eg '/id' = /products/id
 router.get('/', (req, res, next) =>{
