@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 
 const productRoutes = require('./api/routes/products');
 const ordersRoutes = require('./api/routes/orders');
+const userRoutes = require('./api/routes/user');
+
 const tanksRoutes = require('./api/routes/tanks');
 
 mongoose.connect(
@@ -23,7 +25,7 @@ app.use(bodyParser.json());
 // Add headers before any data requests
 
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*') // * access all or and ip or HTTP address. Can only sdtop other webpages but not tools like postman
+    res.header('Access-Control-Allow-Origin', '*'); // * access all or and ip or HTTP address. Can only sdtop other webpages but not tools like postman
     res.header(
         'Access-Control-Allow-Headers',
         'Origin, X-Requested-With, Content-Type, Accept, Authorization'
@@ -39,6 +41,8 @@ app.use((req, res, next) => {
 // sets up middleware, all requets have to go through this
 app.use('/products', productRoutes); //forward to products.js
 app.use('/orders', ordersRoutes); //forward to orders.js
+app.use('/user', userRoutes); //forward to users.js
+
 app.use('/tanks', tanksRoutes); //forward to tanks.js
 
 // capture all requets past '/' as beloq the above app.use() all other requests have failed as there is no route
@@ -47,8 +51,8 @@ app.use((req, res, next) => {
     const error = new Error('Not found');
     error.status = 404; // assign error
     // forward request as error
-    next(error)
-})
+    next(error);
+});
 
 // accepts all errors accross the app
 // eg if database errors then it will skip the abouve first and have its only error 
@@ -58,7 +62,7 @@ app.use((error, req, res, next) => {
         error: {
             message: error.message
         }
-    })
+    });
 });
 
 module.exports = app;
