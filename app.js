@@ -45,6 +45,21 @@ app.use('/user', userRoutes); //forward to users.js
 
 app.use('/tanks', tanksRoutes); //forward to tanks.js
 
+app.use('/', (req, res, next) => {
+    res.status(200).json({
+        message: 'API is online',
+        request: {
+            type: 'GET',
+            message: 'A list of al lthe tanks ever submitted.',
+            url: 'https://' + process.env['C9_HOSTNAME'] + '/tanks/'
+        },
+        credit: {
+            creator: 'Dan B',
+            creatorLink: 'https://danbdesigns.co.uk'
+        }
+    });
+});
+
 // capture all requets past '/' as beloq the above app.use() all other requests have failed as there is no route
 
 app.use((req, res, next) => {
